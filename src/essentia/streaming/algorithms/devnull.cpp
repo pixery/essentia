@@ -38,7 +38,6 @@ void connect(SourceBase& source, DevNullConnector dummy) {
   CREATE_DEVNULL(string);
   CREATE_DEVNULL(vector<string>);
   CREATE_DEVNULL(TNT::Array2D<Real>);
-  CREATE_DEVNULL(Tensor<Real>);
   CREATE_DEVNULL(StereoSample);
   CREATE_DEVNULL(Pool);
 

@@ -251,30 +251,27 @@ def configure(ctx):
         ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so', '-latomic']
 
     if ctx.options.CROSS_COMPILE_IOS:
-        print ("→ Cross-compiling for iOS (ARMv7 and ARM64)")
-        ctx.env.CXXFLAGS += ['-arch', 'armv7']
-        ctx.env.LINKFLAGS += ['-arch', 'armv7']
-        ctx.env.LDFLAGS += ['-arch', 'armv7']
+        print ("→ Cross-compiling for iOS (ARM64)")
         ctx.env.CXXFLAGS += ['-arch', 'arm64']
         ctx.env.LINKFLAGS += ['-arch', 'arm64']
-        ctx.env.LDFLAGS += ['-arch', 'armv64']
+        ctx.env.LDFLAGS += ['-arch', 'arm64']
 
         ctx.env.CXXFLAGS += ['-stdlib=libc++']
-        ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']
+        ctx.env.CXXFLAGS += ['-miphoneos-version-min=11.0']
         ctx.env.CXXFLAGS += ['-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk']
         ctx.env.CXXFLAGS += ['-fembed-bitcode']
 
     if ctx.options.CROSS_COMPILE_IOS_SIM:
-        print ("→ Cross-compiling for iOS Simulator (i386)")
-        ctx.env.CXXFLAGS += ['-arch', 'i386']
-        ctx.env.LINKFLAGS += ['-arch', 'i386']
-        ctx.env.LDFLAGS += ['-arch', 'i386']
+        print ("→ Cross-compiling for iOS Simulator (x86-64, ARM64)")
         ctx.env.CXXFLAGS += ['-arch', 'x86_64']
         ctx.env.LINKFLAGS += ['-arch', 'x86_64']
         ctx.env.LDFLAGS += ['-arch', 'x86_64']
+        ctx.env.CXXFLAGS += ['-arch', 'arm64']
+        ctx.env.LINKFLAGS += ['-arch', 'arm64']
+        ctx.env.LDFLAGS += ['-arch', 'arm64']
 
         ctx.env.CXXFLAGS += ['-stdlib=libc++']
-        ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']
+        ctx.env.CXXFLAGS += ['-miphoneos-version-min=11.0']
         ctx.env.CXXFLAGS += ['-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk']
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build

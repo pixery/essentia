@@ -1,9 +1,5 @@
 ``` 
-brew install pkg-config gcc readline sqlite gdbm freetype libpng eigen libyaml fftw ffmpeg libsamplerate libtag
-
-./waf configure --cross-compile-ios --lightweight=libsamplerate --fft=ACCELERATE --build-static --prefix= --ignore-algos=NNLSChroma --include-algos=AutoCorrelation,BeatTrackerDegara,BeatTrackerMultiFeature,CartesianToPolar,ERBBands,FFT,Flux,FrameCutter,HFC,IIR,Magnitude,MelBands,MovingAverage,NoiseAdder,OnsetDetection,OnsetDetectionGlobal,RhythmExtractor2013,Scale,Spectrum,TempoTapDegara,TempoTapMaxAgreement,TriangularBands,Windowing,Resample,MonoMixer
-./waf build -j8
-./waf install --destdir=./build/output/
+Essentia Android Library Project
 ```
 
 

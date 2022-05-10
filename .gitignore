@@ -53,10 +53,8 @@ captures/
 .gradle
 .idea
 .DS_Store
-app/.externalNativeBuild
-app/build
-app/release
-app/.cxx
+essentia/.cxx
+essentia/build
 build
 captures
 local.properties

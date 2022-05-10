@@ -17,19 +17,21 @@ android {
 
         ndk {
             debugSymbolLevel = 'FULL'
-            abiFilters = ["arm64-v8a"]
-            if (System.getenv("BUILD_ARM_V8_ONLY") != "true") {
-                abiFilters.add("armeabi-v7a")
-                abiFilters.add("x86_64")
-            }
+            abiFilters = ["arm64-v8a", "armeabi-v7a", "x86_64"]
         }
 
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_PLATFORM=android-21', '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=c++_shared'
                 cFlags '-O3'
-                cppFlags '-Wall', "-std=c++17", '-latomic', "-fPIC", "-DANDROID", '-DGTEST_HAS_TR1_TUPLE=0', '-DHAVE_EIGEN3=1', '-DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS', '-D__STDC_CONSTANT_MACROS', '-DEIGEN_MPL2_ONLY'
+                cppFlags '-Wall', '-O3', "-std=c++17", '-latomic', "-fPIC", "-DANDROID", '-DGTEST_HAS_TR1_TUPLE=0', '-DHAVE_EIGEN3=1', '-DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS', '-D__STDC_CONSTANT_MACROS', '-DEIGEN_MPL2_ONLY'
             }
+        }
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "${project.name}-${variant.name}-${defaultConfig.versionName}.aar"
         }
     }
 
@@ -52,6 +54,11 @@ android {
             version '3.22.1'
         }
     }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
 }
 
 dependencies {

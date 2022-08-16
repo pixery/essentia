@@ -10,6 +10,7 @@ object Essentia {
     }
 
     private external fun nativeFindTicksFd(fileDescriptor: FileDescriptor): FloatArray
+    private external fun nativeFindOnsetsFd(fileDescriptor: FileDescriptor): FloatArray
 
     fun findTicks(fileDescriptor: FileDescriptor) = nativeFindTicksFd(fileDescriptor)
 
@@ -17,4 +18,9 @@ object Essentia {
 
     fun findTicks(filePath: String) = findTicks(File(filePath))
 
+    fun findOnsets(fileDescriptor: FileDescriptor): FloatArray = nativeFindOnsetsFd(fileDescriptor)
+
+    fun findOnsets(file: File): FloatArray = file.inputStream().use { findOnsets(it.fd) }
+
+    fun findOnsets(filePath: String): FloatArray = findOnsets(File(filePath))
 }

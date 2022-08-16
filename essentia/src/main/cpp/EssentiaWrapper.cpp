@@ -17,6 +17,28 @@ static inline int jniGetFDFromFileDescriptor(JNIEnv *env, jobject fd) {
     return env->GetIntField(fd, gFileDescriptorClassInfo.descriptor);
 }
 
+static std::vector<essentia::Real> getSignalFromFileDescriptor(JNIEnv *env, jobject fileDescriptor) {
+    auto fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+    struct stat statbuf{};
+    fstat(fd, &statbuf);
+    auto realPCMBuffer = (char *) mmap(nullptr, statbuf.st_size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0); // pcm file consists of values between -128 to 127
+
+    std::vector<essentia::Real> signal;
+    signal.reserve(statbuf.st_size);
+    for (size_t i = 0; i < statbuf.st_size; i++) {
+        signal.push_back((float) realPCMBuffer[i] / 128.f); // pcm values are normalized here
+    }
+    munmap(realPCMBuffer, statbuf.st_size);
+    return signal;
+}
+
+static jfloatArray jfloatArrayFromVector(JNIEnv *env, std::vector<float>& vector) {
+    auto vectorSize = (jsize) vector.size();
+    auto floatArray = env->NewFloatArray(vectorSize);
+    env->SetFloatArrayRegion(floatArray, 0, vectorSize, vector.data());
+    return floatArray;
+}
+
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *unused) {
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -39,26 +61,13 @@ extern "C"
 JNIEXPORT jfloatArray JNICALL
 Java_com_pixerylabs_android_essentia_wrapper_Essentia_nativeFindTicksFd(JNIEnv *env, jobject thiz,
                                                                       jobject fileDescriptor) {
-    auto fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    struct stat statbuf;
-    fstat(fd, &statbuf);
-    auto realPCMBuffer = (char *) mmap(nullptr, statbuf.st_size, PROT_READ, MAP_PRIVATE|MAP_POPULATE, fd, 0); // pcm file consists of values between -128 to 127
-
-    auto signal = std::vector<essentia::Real>();
-    signal.reserve(statbuf.st_size);
-    for (size_t i = 0; i < statbuf.st_size; i++) {
-        signal.push_back(realPCMBuffer[i] / 128.f); // pcm values are normalized here
-    }
-    munmap(realPCMBuffer, statbuf.st_size);
-
-    auto ticks = std::vector<essentia::Real>();
+    auto signal = getSignalFromFileDescriptor(env, fileDescriptor);
 
     essentia::init();
-    auto &factory = essentia::standard::AlgorithmFactory::instance();
-    auto rhythmExtractor = factory.create("RhythmExtractor2013", "method", "multifeature");
+    auto rhythmExtractor = essentia::standard::AlgorithmFactory::create("RhythmExtractor2013", "method", "multifeature");
 
     essentia::Real bpm, confidence;
-    std::vector<essentia::Real> estimates, bpmIntervals;
+    std::vector<essentia::Real> ticks, estimates, bpmIntervals;
 
     rhythmExtractor->input("signal").set(signal);
     rhythmExtractor->output("ticks").set(ticks);
@@ -68,12 +77,35 @@ Java_com_pixerylabs_android_essentia_wrapper_Essentia_nativeFindTicksFd(JNIEnv *
     rhythmExtractor->output("bpmIntervals").set(bpmIntervals);
     rhythmExtractor->compute();
 
-    auto tickCount = (jsize) ticks.size();
-    auto _ticks = env->NewFloatArray(tickCount);
-    env->SetFloatArrayRegion(_ticks, 0, tickCount, ticks.data());
+    auto _ticks = jfloatArrayFromVector(env, ticks);
 
     delete rhythmExtractor;
     essentia::shutdown();
 
     return _ticks;
+}
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_pixerylabs_android_essentia_wrapper_Essentia_nativeFindOnsetsFd(JNIEnv *env, jobject thiz,
+                                                                         jobject fileDescriptor) {
+    auto signal = getSignalFromFileDescriptor(env, fileDescriptor);
+
+    essentia::init();
+    auto onsetRateExtractor = essentia::standard::AlgorithmFactory::create("OnsetRate");
+
+    std::vector<essentia::Real> onsets;
+    essentia::Real onsetRate;
+
+    onsetRateExtractor->input("signal").set(signal);
+    onsetRateExtractor->output("onsets").set(onsets);
+    onsetRateExtractor->output("onsetRate").set(onsetRate);
+    onsetRateExtractor->compute();
+
+    auto result = jfloatArrayFromVector(env, onsets);
+
+    delete onsetRateExtractor;
+    essentia::shutdown();
+
+    return result;
 }

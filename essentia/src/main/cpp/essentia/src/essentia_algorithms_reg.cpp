@@ -24,6 +24,8 @@
 #include "algorithms/complex/magnitude.h"
 #include "algorithms/standard/spectrum.h"
 #include "algorithms/rhythm/tempotapmaxagreement.h"
+#include "algorithms/rhythm/onsetrate.h"
+#include "algorithms/rhythm/onsets.h"
 
 namespace essentia {
     namespace standard {
@@ -60,6 +62,8 @@ namespace essentia {
             AlgorithmFactory::Registrar<TempoTapDegara> regTempoTapDegara;
             AlgorithmFactory::Registrar<OnsetDetection> regOnsetDetection;
             AlgorithmFactory::Registrar<TempoTapMaxAgreement> regTempoTagMaxAgreement;
+            AlgorithmFactory::Registrar<OnsetRate> regOnsetRate;
+            AlgorithmFactory::Registrar<Onsets> regOnsets;
         }}}
 
 
@@ -99,4 +103,6 @@ namespace essentia {
             AlgorithmFactory::Registrar<TempoTapDegara, essentia::standard::TempoTapDegara> regTempoTapDegara;
             AlgorithmFactory::Registrar<OnsetDetection, essentia::standard::OnsetDetection> regOnsetDetection;
             AlgorithmFactory::Registrar<TempoTapMaxAgreement, essentia::standard::TempoTapMaxAgreement> regTempoTagMaxAgreement;
+            AlgorithmFactory::Registrar<OnsetRate, essentia::standard::OnsetRate> regOnsetRate;
+            AlgorithmFactory::Registrar<Onsets, essentia::standard::Onsets> regOnsets;
         }}}

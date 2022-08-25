@@ -56,21 +56,27 @@ Java_com_pixerylabs_android_essentia_wrapper_Essentia_nativeFindTicksFd(JNIEnv *
     essentia::init();
     auto &factory = essentia::standard::AlgorithmFactory::instance();
     auto rhythmExtractor = factory.create("RhythmExtractor2013", "method", "multifeature");
+    jfloatArray _ticks;
+    
+    try {
+        essentia::Real bpm, confidence;
+        std::vector<essentia::Real> estimates, bpmIntervals;
 
-    essentia::Real bpm, confidence;
-    std::vector<essentia::Real> estimates, bpmIntervals;
+        rhythmExtractor->input("signal").set(signal);
+        rhythmExtractor->output("ticks").set(ticks);
+        rhythmExtractor->output("bpm").set(bpm);
+        rhythmExtractor->output("confidence").set(confidence);
+        rhythmExtractor->output("estimates").set(estimates);
+        rhythmExtractor->output("bpmIntervals").set(bpmIntervals);
+        rhythmExtractor->compute();
 
-    rhythmExtractor->input("signal").set(signal);
-    rhythmExtractor->output("ticks").set(ticks);
-    rhythmExtractor->output("bpm").set(bpm);
-    rhythmExtractor->output("confidence").set(confidence);
-    rhythmExtractor->output("estimates").set(estimates);
-    rhythmExtractor->output("bpmIntervals").set(bpmIntervals);
-    rhythmExtractor->compute();
-
-    auto tickCount = (jsize) ticks.size();
-    auto _ticks = env->NewFloatArray(tickCount);
-    env->SetFloatArrayRegion(_ticks, 0, tickCount, ticks.data());
+        auto tickCount = (jsize) ticks.size();
+        _ticks = env->NewFloatArray(tickCount);
+        env->SetFloatArrayRegion(_ticks, 0, tickCount, ticks.data());
+    } catch (essentia::EssentiaException &ex) {
+        __android_log_print(ANDROID_LOG_ERROR, "Essentia", "%s", ex.what());
+        _ticks = env->NewFloatArray(0);
+    }
 
     delete rhythmExtractor;
     essentia::shutdown();

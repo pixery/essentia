@@ -5,17 +5,17 @@ plugins {
 
 android {
     namespace 'com.pixerylabs.android.essentia'
-    compileSdk 32
+    compileSdkVersion 36
 
     defaultConfig {
         minSdk 21
-        targetSdk 32
-        versionName "1.1"
+        targetSdk 36
+        versionName "1.1.1"
 
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-
+        ndkVersion "28.2.13676358"
         ndk {
             debugSymbolLevel = 'FULL'
+            //noinspection ChromeOsAbiSupport
             abiFilters = ["arm64-v8a", "armeabi-v7a"]
         }
 
@@ -23,12 +23,12 @@ android {
             cmake {
                 arguments '-DANDROID_PLATFORM=android-21', '-DANDROID_TOOLCHAIN=clang', '-DANDROID_STL=c++_shared'
                 cFlags '-O3'
-                cppFlags '-Wall', '-O3', "-std=c++17", '-latomic', "-fPIC", "-DANDROID", '-DGTEST_HAS_TR1_TUPLE=0', '-DHAVE_EIGEN3=1', '-DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS', '-D__STDC_CONSTANT_MACROS', '-DEIGEN_MPL2_ONLY'
+                cppFlags '-Wall', '-O3', "-std=c++11", '-latomic', "-fPIC", "-DANDROID", '-DGTEST_HAS_TR1_TUPLE=0', '-DHAVE_EIGEN3=1', '-DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS', '-D__STDC_CONSTANT_MACROS', '-DEIGEN_MPL2_ONLY'
             }
         }
     }
 
-    libraryVariants.all { variant ->
+    libraryVariants.configureEach { variant ->
         variant.outputs.all {
             outputFileName = "${project.name}-${variant.name}-${defaultConfig.versionName}.aar"
         }
@@ -41,11 +41,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
+    kotlin {
+        jvmToolchain(21)
     }
     externalNativeBuild {
         cmake {
@@ -53,13 +53,4 @@ android {
             version '3.22.1'
         }
     }
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
-}
-
-dependencies {
-    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.3'
 }
